@@ -1,7 +1,6 @@
-﻿namespace P7CreateRestApi.Models
+﻿namespace P7CreateRestApi.Models;
+
+public class LoginModel
 {
-    public class LoginModel
-    {
-        // TODO: implement properties needeed for login model.
-    }
+    // TODO: implement properties needeed for login model.
 }

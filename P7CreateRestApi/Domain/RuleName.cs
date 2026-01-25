@@ -2,6 +2,12 @@ namespace Dot.Net.WebApi.Controllers
 {
     public class RuleName
     {
-        // TODO: Map columns in data table RULENAME with corresponding fields
+        public int Id { get; set; }
+        public required string Name { get; set; }
+        public required string Description { get; set; }
+        public required string Json { get; set; }
+        public required string Template { get; set; }
+        public required string SqlStr { get; set; }
+        public required string SqlPart { get; set; }
     }
 }

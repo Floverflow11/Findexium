@@ -16,6 +16,7 @@ builder.Services.AddDbContext<LocalDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddTransient<IBidListRepository, BidListRepository>();
+builder.Services.AddTransient<ICurvePointRepository, CurvePointRepository>();
 
 var app = builder.Build();
 

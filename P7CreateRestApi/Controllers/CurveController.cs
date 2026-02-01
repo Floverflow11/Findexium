@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using P7CreateRestApi.Domain;
+using P7CreateRestApi.Models;
+using P7CreateRestApi.Repositories;
 
 namespace P7CreateRestApi.Controllers;
 
@@ -7,51 +9,102 @@ namespace P7CreateRestApi.Controllers;
 [Route("[controller]")]
 public class CurveController : ControllerBase
 {
-    // TODO: Inject Curve Point service
+    private readonly ICurvePointRepository _repository;
 
-    [HttpGet]
-    [Route("list")]
-    public IActionResult Home()
+    public CurveController(ICurvePointRepository repository)
     {
-        return Ok();
+        _repository = repository;
     }
 
     [HttpGet]
-    [Route("add")]
-    public IActionResult AddCurvePoint([FromBody]CurvePoint curvePoint)
+    [ProducesResponseType(typeof(List<CurvePointOutputDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Get()
     {
-        return Ok();
-    }
+        var curvePoints = await _repository.GetAsync();
 
-    [HttpGet]
-    [Route("validate")]
-    public IActionResult Validate([FromBody]CurvePoint curvePoint)
-    {
-        // TODO: check data valid and save to db, after saving return bid list
-        return Ok();
-    }
+        var outputDtos = curvePoints.Select(c => new CurvePointOutputDto(c.Id, c.CurveId, c.Term, c.CurvePointValue))
+            .ToList();
 
-    [HttpGet]
-    [Route("update/{id}")]
-    public IActionResult ShowUpdateForm(int id)
-    {
-        // TODO: get CurvePoint by Id and to model then show to the form
-        return Ok();
+        return Ok(outputDtos);
     }
 
     [HttpPost]
-    [Route("update/{id}")]
-    public IActionResult UpdateCurvePoint(int id, [FromBody] CurvePoint curvePoint)
+    [ProducesResponseType(typeof(CurvePointOutputDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Create([FromBody] CurvePointInputDto inputDto)
     {
-        // TODO: check required fields, if valid call service to update Curve and return Curve list
-        return Ok();
+        var curvePoint = new CurvePoint
+        {
+            CurveId = inputDto.CurveId,
+            Term = inputDto.Term,
+            CurvePointValue = inputDto.CurvePointValue
+        };
+
+        await _repository.AddAsync(curvePoint);
+
+        var outputDto = new CurvePointOutputDto(curvePoint.Id, curvePoint.CurveId, curvePoint.Term,
+            curvePoint.CurvePointValue);
+
+        return CreatedAtAction(nameof(GetById), new { id = curvePoint.Id }, outputDto);
     }
 
-    [HttpDelete]
-    [Route("{id}")]
-    public IActionResult DeleteBid(int id)
+    [HttpGet("{id:int}")]
+    [ProducesResponseType(typeof(CurvePointOutputDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetById(int id)
     {
-        // TODO: Find Curve by Id and delete the Curve, return to Curve list
-        return Ok();
+        var curvePoint = await _repository.GetByIdAsync(id);
+
+        if (curvePoint == null)
+        {
+            return NotFound();
+        }
+
+        var outputDto = new CurvePointOutputDto(curvePoint.Id, curvePoint.CurveId, curvePoint.Term,
+            curvePoint.CurvePointValue);
+
+        return Ok(outputDto);
+    }
+
+    [HttpPut("{id:int}")]
+    [ProducesResponseType(typeof(CurvePointOutputDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Update(int id, CurvePointInputDto inputDto)
+    {
+        var curvePoint = await _repository.GetByIdAsync(id);
+
+        if (curvePoint == null)
+        {
+            return NotFound();
+        }
+
+        curvePoint.CurveId = inputDto.CurveId;
+        curvePoint.Term = inputDto.Term;
+        curvePoint.CurvePointValue = inputDto.CurvePointValue;
+
+        await _repository.UpdateAsync();
+
+        var outputDto = new CurvePointOutputDto(curvePoint.Id, curvePoint.CurveId, curvePoint.Term,
+            curvePoint.CurvePointValue);
+
+        return Ok(outputDto);
+    }
+
+    [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var curvePoint = await _repository.GetByIdAsync(id);
+
+        if (curvePoint == null)
+        {
+            return NotFound();
+        }
+
+        await _repository.DeleteAsync(curvePoint);
+
+        return NoContent();
     }
 }

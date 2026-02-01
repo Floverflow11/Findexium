@@ -19,6 +19,7 @@ builder.Services.AddTransient<IBidListRepository, BidListRepository>();
 builder.Services.AddTransient<ICurvePointRepository, CurvePointRepository>();
 builder.Services.AddTransient<IRatingRepository, RatingRepository>();
 builder.Services.AddTransient<IRuleNameRepository, RuleNameRepository>();
+builder.Services.AddTransient<ITradeRepository, TradeRepository>();
 
 var app = builder.Build();
 

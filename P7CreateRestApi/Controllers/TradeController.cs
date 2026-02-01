@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using P7CreateRestApi.Domain;
+using P7CreateRestApi.Models;
+using P7CreateRestApi.Repositories;
 
 namespace P7CreateRestApi.Controllers;
 
@@ -7,52 +9,146 @@ namespace P7CreateRestApi.Controllers;
 [Route("[controller]")]
 public class TradeController : ControllerBase
 {
-    // TODO: Inject Trade service
+    private readonly ITradeRepository _repository;
 
-    [HttpGet]
-    [Route("list")]
-    public IActionResult Home()
+    public TradeController(ITradeRepository repository)
     {
-        // TODO: find all Trade, add to model
-        return Ok();
+        _repository = repository;
     }
 
     [HttpGet]
-    [Route("add")]
-    public IActionResult AddTrade([FromBody]Trade trade)
+    [ProducesResponseType(typeof(List<TradeOutputDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Get()
     {
-        return Ok();
-    }
+        var trades = await _repository.GetAsync();
 
-    [HttpGet]
-    [Route("validate")]
-    public IActionResult Validate([FromBody]Trade trade)
-    {
-        // TODO: check data valid and save to db, after saving return Trade list
-        return Ok();
-    }
+        var outputDtos = trades.Select(t => new TradeOutputDto(t.TradeId, t.Account, t.AccountType, t.BuyQuantity,
+            t.SellQuantity, t.BuyPrice, t.SellPrice, t.TradeDate, t.TradeSecurity, t.TradeStatus, t.Trader,
+            t.Benchmark, t.Book, t.CreationName, t.CreationDate, t.RevisionName, t.RevisionDate, t.DealName,
+            t.DealType, t.SourceListId, t.Side)).ToList();
 
-    [HttpGet]
-    [Route("update/{id}")]
-    public IActionResult ShowUpdateForm(int id)
-    {
-        // TODO: get Trade by Id and to model then show to the form
-        return Ok();
+        return Ok(outputDtos);
     }
 
     [HttpPost]
-    [Route("update/{id}")]
-    public IActionResult UpdateTrade(int id, [FromBody] Trade trade)
+    [ProducesResponseType(typeof(TradeOutputDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Create([FromBody] TradeInputDto inputDto)
     {
-        // TODO: check required fields, if valid call service to update Trade and return Trade list
-        return Ok();
+        var trade = new Trade
+        {
+            Account = inputDto.Account,
+            AccountType = inputDto.AccountType,
+            BuyQuantity = inputDto.BuyQuantity,
+            SellQuantity = inputDto.SellQuantity,
+            BuyPrice = inputDto.BuyPrice,
+            SellPrice = inputDto.SellPrice,
+            TradeDate = inputDto.TradeDate,
+            TradeSecurity = inputDto.TradeSecurity,
+            TradeStatus = inputDto.TradeStatus,
+            Trader = inputDto.Trader,
+            Benchmark = inputDto.Benchmark,
+            Book = inputDto.Book,
+            CreationName = inputDto.CreationName,
+            RevisionName = inputDto.RevisionName,
+            DealName = inputDto.DealName,
+            DealType = inputDto.DealType,
+            SourceListId = inputDto.SourceListId,
+            Side = inputDto.Side
+        };
+
+        await _repository.AddAsync(trade);
+
+        var outputDto = new TradeOutputDto(trade.TradeId, trade.Account, trade.AccountType, trade.BuyQuantity,
+            trade.SellQuantity, trade.BuyPrice, trade.SellPrice, trade.TradeDate, trade.TradeSecurity,
+            trade.TradeStatus, trade.Trader,
+            trade.Benchmark, trade.Book, trade.CreationName, trade.CreationDate, trade.RevisionName, trade.RevisionDate,
+            trade.DealName,
+            trade.DealType, trade.SourceListId, trade.Side);
+
+        return CreatedAtAction(nameof(GetById), new { id = trade.TradeId }, outputDto);
     }
 
-    [HttpDelete]
-    [Route("{id}")]
-    public IActionResult DeleteTrade(int id)
+    [HttpGet("{id:int}")]
+    [ProducesResponseType(typeof(TradeOutputDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetById(int id)
     {
-        // TODO: Find Trade by Id and delete the Trade, return to Trade list
-        return Ok();
+        var trade = await _repository.GetByIdAsync(id);
+
+        if (trade == null)
+        {
+            return NotFound();
+        }
+
+        var outputDto = new TradeOutputDto(trade.TradeId, trade.Account, trade.AccountType, trade.BuyQuantity,
+            trade.SellQuantity, trade.BuyPrice, trade.SellPrice, trade.TradeDate, trade.TradeSecurity,
+            trade.TradeStatus, trade.Trader,
+            trade.Benchmark, trade.Book, trade.CreationName, trade.CreationDate, trade.RevisionName, trade.RevisionDate,
+            trade.DealName,
+            trade.DealType, trade.SourceListId, trade.Side);
+
+        return Ok(outputDto);
+    }
+
+    [HttpPut("{id:int}")]
+    [ProducesResponseType(typeof(TradeOutputDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Update(int id, TradeInputDto inputDto)
+    {
+        var trade = await _repository.GetByIdAsync(id);
+
+        if (trade == null)
+        {
+            return NotFound();
+        }
+
+        trade.Account = inputDto.Account;
+        trade.AccountType = inputDto.AccountType;
+        trade.BuyQuantity = inputDto.BuyQuantity;
+        trade.SellQuantity = inputDto.SellQuantity;
+        trade.BuyPrice = inputDto.BuyPrice;
+        trade.SellPrice = inputDto.SellPrice;
+        trade.TradeDate = inputDto.TradeDate;
+        trade.TradeSecurity = inputDto.TradeSecurity;
+        trade.TradeStatus = inputDto.TradeStatus;
+        trade.Trader = inputDto.Trader;
+        trade.Benchmark = inputDto.Benchmark;
+        trade.Book = inputDto.Book;
+        trade.CreationName = inputDto.CreationName;
+        trade.RevisionName = inputDto.RevisionName;
+        trade.DealName = inputDto.DealName;
+        trade.DealType = inputDto.DealType;
+        trade.SourceListId = inputDto.SourceListId;
+        trade.Side = inputDto.Side;
+
+        await _repository.UpdateAsync();
+
+        var outputDto = new TradeOutputDto(trade.TradeId, trade.Account, trade.AccountType, trade.BuyQuantity,
+            trade.SellQuantity, trade.BuyPrice, trade.SellPrice, trade.TradeDate, trade.TradeSecurity,
+            trade.TradeStatus, trade.Trader,
+            trade.Benchmark, trade.Book, trade.CreationName, trade.CreationDate, trade.RevisionName, trade.RevisionDate,
+            trade.DealName,
+            trade.DealType, trade.SourceListId, trade.Side);
+
+        return Ok(outputDto);
+    }
+
+    [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var trade = await _repository.GetByIdAsync(id);
+
+        if (trade == null)
+        {
+            return NotFound();
+        }
+
+        await _repository.DeleteAsync(trade);
+
+        return NoContent();
     }
 }

@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using P7CreateRestApi.Domain;
+using P7CreateRestApi.Models;
+using P7CreateRestApi.Repositories;
 
 namespace P7CreateRestApi.Controllers;
 
@@ -7,52 +9,108 @@ namespace P7CreateRestApi.Controllers;
 [Route("[controller]")]
 public class RuleNameController : ControllerBase
 {
-    // TODO: Inject RuleName service
+    private readonly IRuleNameRepository _repository;
 
-    [HttpGet]
-    [Route("list")]
-    public IActionResult Home()
+    public RuleNameController(IRuleNameRepository repository)
     {
-        // TODO: find all RuleName, add to model
-        return Ok();
+        _repository = repository;
     }
 
     [HttpGet]
-    [Route("add")]
-    public IActionResult AddRuleName([FromBody]RuleName trade)
+    [ProducesResponseType(typeof(List<RuleNameOutputDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Get()
     {
-        return Ok();
-    }
+        var ruleNames = await _repository.GetAsync();
 
-    [HttpGet]
-    [Route("validate")]
-    public IActionResult Validate([FromBody]RuleName trade)
-    {
-        // TODO: check data valid and save to db, after saving return RuleName list
-        return Ok();
-    }
+        var outputDtos = ruleNames.Select(r =>
+            new RuleNameOutputDto(r.Id, r.Name, r.Description, r.Json, r.Template, r.SqlStr, r.SqlPart)).ToList();
 
-    [HttpGet]
-    [Route("update/{id}")]
-    public IActionResult ShowUpdateForm(int id)
-    {
-        // TODO: get RuleName by Id and to model then show to the form
-        return Ok();
+        return Ok(outputDtos);
     }
 
     [HttpPost]
-    [Route("update/{id}")]
-    public IActionResult UpdateRuleName(int id, [FromBody] RuleName rating)
+    [ProducesResponseType(typeof(RuleNameOutputDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Create([FromBody] RuleNameInputDto inputDto)
     {
-        // TODO: check required fields, if valid call service to update RuleName and return RuleName list
-        return Ok();
+        var ruleName = new RuleName
+        {
+            Name = inputDto.Name,
+            Description = inputDto.Description,
+            Json = inputDto.Json,
+            Template = inputDto.Template,
+            SqlStr = inputDto.SqlStr,
+            SqlPart = inputDto.SqlPart
+        };
+
+        await _repository.AddAsync(ruleName);
+
+        var outputDto = new RuleNameOutputDto(ruleName.Id, ruleName.Name, ruleName.Description, ruleName.Json,
+            ruleName.Template, ruleName.SqlStr, ruleName.SqlPart);
+
+        return CreatedAtAction(nameof(GetById), new { id = ruleName.Id }, outputDto);
     }
 
-    [HttpDelete]
-    [Route("{id}")]
-    public IActionResult DeleteRuleName(int id)
+    [HttpGet("{id:int}")]
+    [ProducesResponseType(typeof(RuleNameOutputDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetById(int id)
     {
-        // TODO: Find RuleName by Id and delete the RuleName, return to Rule list
-        return Ok();
+        var ruleName = await _repository.GetByIdAsync(id);
+
+        if (ruleName == null)
+        {
+            return NotFound();
+        }
+
+        var outputDto = new RuleNameOutputDto(ruleName.Id, ruleName.Name, ruleName.Description, ruleName.Json,
+            ruleName.Template, ruleName.SqlStr, ruleName.SqlPart);
+
+        return Ok(outputDto);
+    }
+
+    [HttpPut("{id:int}")]
+    [ProducesResponseType(typeof(RuleNameOutputDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Update(int id, RuleNameInputDto inputDto)
+    {
+        var ruleName = await _repository.GetByIdAsync(id);
+
+        if (ruleName == null)
+        {
+            return NotFound();
+        }
+
+        ruleName.Name = inputDto.Name;
+        ruleName.Description = inputDto.Description;
+        ruleName.Json = inputDto.Json;
+        ruleName.Template = inputDto.Template;
+        ruleName.SqlStr = inputDto.SqlStr;
+        ruleName.SqlPart = inputDto.SqlPart;
+
+        await _repository.UpdateAsync();
+
+        var outputDto = new RuleNameOutputDto(ruleName.Id, ruleName.Name, ruleName.Description, ruleName.Json,
+            ruleName.Template, ruleName.SqlStr, ruleName.SqlPart);
+
+        return Ok(outputDto);
+    }
+
+    [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var ruleName = await _repository.GetByIdAsync(id);
+
+        if (ruleName == null)
+        {
+            return NotFound();
+        }
+
+        await _repository.DeleteAsync(ruleName);
+
+        return NoContent();
     }
 }

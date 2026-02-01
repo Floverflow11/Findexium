@@ -18,6 +18,7 @@ builder.Services.AddDbContext<LocalDbContext>(options =>
 builder.Services.AddTransient<IBidListRepository, BidListRepository>();
 builder.Services.AddTransient<ICurvePointRepository, CurvePointRepository>();
 builder.Services.AddTransient<IRatingRepository, RatingRepository>();
+builder.Services.AddTransient<IRuleNameRepository, RuleNameRepository>();
 
 var app = builder.Build();
 

@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using P7CreateRestApi.Domain;
+using P7CreateRestApi.Models;
+using P7CreateRestApi.Repositories;
 
 namespace P7CreateRestApi.Controllers;
 
@@ -7,33 +9,99 @@ namespace P7CreateRestApi.Controllers;
 [Route("[controller]")]
 public class BidListController : ControllerBase
 {
-    [HttpGet]
-    [Route("validate")]
-    public IActionResult Validate([FromBody] BidList bidList)
-    {
-        // TODO: check data valid and save to db, after saving return bid list
-        return Ok();
-    }
+    private readonly IBidListRepository _repository;
 
-    [HttpGet]
-    [Route("update/{id}")]
-    public IActionResult ShowUpdateForm(int id)
+    public BidListController(IBidListRepository repository)
     {
-        return Ok();
+        _repository = repository;
     }
 
     [HttpPost]
-    [Route("update/{id}")]
-    public IActionResult UpdateBid(int id, [FromBody] BidList bidList)
+    [ProducesResponseType(typeof(BidListOutputDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Create([FromBody] BidListInputDto inputDto)
     {
-        // TODO: check required fields, if valid call service to update Bid and return list Bid
-        return Ok();
+        var bidList = new BidList
+        {
+            Account = inputDto.Account,
+            BidType = inputDto.BidType,
+            BidQuantity = inputDto.BidQuantity,
+            Benchmark = string.Empty,
+            Commentary = string.Empty,
+            BidSecurity = string.Empty,
+            BidStatus = string.Empty,
+            Trader = string.Empty,
+            Book = string.Empty,
+            CreationName = string.Empty,
+            RevisionName = string.Empty,
+            DealName = string.Empty,
+            DealType = string.Empty,
+            SourceListId = string.Empty,
+            Side = string.Empty
+        };
+
+        await _repository.AddAsync(bidList);
+
+        var outputDto = new BidListOutputDto(bidList.BidListId, bidList.Account, bidList.BidType, bidList.BidQuantity);
+
+        return CreatedAtAction(nameof(GetById), new { id = bidList.BidListId }, outputDto);
     }
 
-    [HttpDelete]
-    [Route("{id}")]
-    public IActionResult DeleteBid(int id)
+    [HttpGet("{id:int}")]
+    [ProducesResponseType(typeof(BidListOutputDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetById(int id)
     {
-        return Ok();
+        var bidList = await _repository.GetByIdAsync(id);
+
+        if (bidList == null)
+        {
+            return NotFound();
+        }
+
+        var outputDto = new BidListOutputDto(bidList.BidListId, bidList.Account, bidList.BidType, bidList.BidQuantity);
+
+        return Ok(outputDto);
+    }
+
+    [HttpPut("{id:int}")]
+    [ProducesResponseType(typeof(BidListOutputDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Update(int id, BidListInputDto inputDto)
+    {
+        var bidList = await _repository.GetByIdAsync(id);
+
+        if (bidList == null)
+        {
+            return NotFound();
+        }
+
+        bidList.Account = inputDto.Account;
+        bidList.BidType = inputDto.BidType;
+        bidList.BidQuantity = inputDto.BidQuantity;
+
+        await _repository.UpdateAsync();
+
+        var outputDto = new BidListOutputDto(bidList.BidListId, bidList.Account, bidList.BidType, bidList.BidQuantity);
+
+        return Ok(outputDto);
+    }
+
+    [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var bidList = await _repository.GetByIdAsync(id);
+
+        if (bidList == null)
+        {
+            return NotFound();
+        }
+
+        await _repository.DeleteAsync(bidList);
+
+        return NoContent();
     }
 }

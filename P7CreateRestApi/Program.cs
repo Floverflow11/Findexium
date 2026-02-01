@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using P7CreateRestApi.Data;
+using P7CreateRestApi.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
@@ -13,6 +14,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<LocalDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddTransient<IBidListRepository, BidListRepository>();
 
 var app = builder.Build();
 

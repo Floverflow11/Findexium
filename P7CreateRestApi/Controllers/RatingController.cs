@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using P7CreateRestApi.Domain;
+using P7CreateRestApi.Models;
+using P7CreateRestApi.Repositories;
 
 namespace P7CreateRestApi.Controllers;
 
@@ -7,52 +9,105 @@ namespace P7CreateRestApi.Controllers;
 [Route("[controller]")]
 public class RatingController : ControllerBase
 {
-    // TODO: Inject Rating service
+    private readonly IRatingRepository _repository;
 
-    [HttpGet]
-    [Route("list")]
-    public IActionResult Home()
+    public RatingController(IRatingRepository repository)
     {
-        // TODO: find all Rating, add to model
-        return Ok();
+        _repository = repository;
     }
 
     [HttpGet]
-    [Route("add")]
-    public IActionResult AddRatingForm([FromBody]Rating rating)
+    [ProducesResponseType(typeof(List<RatingOutputDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Get()
     {
-        return Ok();
-    }
+        var ratings = await _repository.GetAsync();
 
-    [HttpGet]
-    [Route("validate")]
-    public IActionResult Validate([FromBody]Rating rating)
-    {
-        // TODO: check data valid and save to db, after saving return Rating list
-        return Ok();
-    }
+        var outputDtos = ratings.Select(r =>
+                new RatingOutputDto(r.Id, r.MoodysRating, r.SandPRating, r.FitchRating, r.OrderNumber))
+            .ToList();
 
-    [HttpGet]
-    [Route("update/{id}")]
-    public IActionResult ShowUpdateForm(int id)
-    {
-        // TODO: get Rating by Id and to model then show to the form
-        return Ok();
+        return Ok(outputDtos);
     }
 
     [HttpPost]
-    [Route("update/{id}")]
-    public IActionResult UpdateRating(int id, [FromBody] Rating rating)
+    [ProducesResponseType(typeof(RatingOutputDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Create([FromBody] RatingInputDto inputDto)
     {
-        // TODO: check required fields, if valid call service to update Rating and return Rating list
-        return Ok();
+        var rating = new Rating
+        {
+            MoodysRating = inputDto.MoodysRating,
+            SandPRating = inputDto.SandPRating,
+            FitchRating = inputDto.FitchRating,
+            OrderNumber = inputDto.OrderNumber
+        };
+
+        await _repository.AddAsync(rating);
+
+        var outputDto = new RatingOutputDto(rating.Id, rating.MoodysRating, rating.SandPRating, rating.FitchRating,
+            rating.OrderNumber);
+
+        return CreatedAtAction(nameof(GetById), new { id = rating.Id }, outputDto);
     }
 
-    [HttpDelete]
-    [Route("{id}")]
-    public IActionResult DeleteRating(int id)
+    [HttpGet("{id:int}")]
+    [ProducesResponseType(typeof(RatingOutputDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetById(int id)
     {
-        // TODO: Find Rating by Id and delete the Rating, return to Rating list
-        return Ok();
+        var rating = await _repository.GetByIdAsync(id);
+
+        if (rating == null)
+        {
+            return NotFound();
+        }
+
+        var outputDto = new RatingOutputDto(rating.Id, rating.MoodysRating, rating.SandPRating, rating.FitchRating,
+            rating.OrderNumber);
+
+        return Ok(outputDto);
+    }
+
+    [HttpPut("{id:int}")]
+    [ProducesResponseType(typeof(RatingOutputDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Update(int id, RatingInputDto inputDto)
+    {
+        var rating = await _repository.GetByIdAsync(id);
+
+        if (rating == null)
+        {
+            return NotFound();
+        }
+
+        rating.MoodysRating = inputDto.MoodysRating;
+        rating.SandPRating = inputDto.SandPRating;
+        rating.FitchRating = inputDto.FitchRating;
+        rating.OrderNumber = inputDto.OrderNumber;
+
+        await _repository.UpdateAsync();
+
+        var outputDto = new RatingOutputDto(rating.Id, rating.MoodysRating, rating.SandPRating, rating.FitchRating,
+            rating.OrderNumber);
+
+        return Ok(outputDto);
+    }
+
+    [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var rating = await _repository.GetByIdAsync(id);
+
+        if (rating == null)
+        {
+            return NotFound();
+        }
+
+        await _repository.DeleteAsync(rating);
+
+        return NoContent();
     }
 }

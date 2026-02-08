@@ -16,6 +16,19 @@ public class BidListController : ControllerBase
         _repository = repository;
     }
 
+    [HttpGet]
+    [ProducesResponseType(typeof(List<BidListOutputDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Get()
+    {
+        var bidLists = await _repository.GetAsync();
+
+        var outputDtos = bidLists.Select(b =>
+                new BidListOutputDto(b.BidListId, b.Account, b.BidType, b.BidQuantity))
+            .ToList();
+
+        return Ok(outputDtos);
+    }
+
     [HttpPost]
     [ProducesResponseType(typeof(BidListOutputDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -13,6 +13,11 @@ public class BidListRepository : IBidListRepository
         _dbContext = dbContext;
     }
 
+    public async Task<List<BidList>> GetAsync()
+    {
+        return await _dbContext.BidLists.ToListAsync();
+    }
+
     public async Task<BidList?> GetByIdAsync(int id)
     {
         return await _dbContext.BidLists.SingleOrDefaultAsync(b => b.BidListId == id);

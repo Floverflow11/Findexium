@@ -1,10 +1,8 @@
+using Microsoft.AspNetCore.Identity;
+
 namespace P7CreateRestApi.Domain;
 
-public class User
+public class User : IdentityUser
 {
-    public int Id { get; set; }
-    public required string UserName { get; set; }
-    public required string Password { get; set; }
-    public required string Fullname { get; set; }
-    public required string Role { get; set; }
+    public required string FullName { get; set; }
 }

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using P7CreateRestApi.Domain;
 using P7CreateRestApi.Models;
@@ -5,6 +6,7 @@ using P7CreateRestApi.Repositories;
 
 namespace P7CreateRestApi.Controllers;
 
+[Authorize(Roles = "Admin")]
 [ApiController]
 [Route("[controller]")]
 public class TradeController : ControllerBase
@@ -18,6 +20,8 @@ public class TradeController : ControllerBase
 
     [HttpGet]
     [ProducesResponseType(typeof(List<TradeOutputDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> Get()
     {
         var trades = await _repository.GetAsync();
@@ -33,6 +37,8 @@ public class TradeController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(TradeOutputDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> Create([FromBody] TradeInputDto inputDto)
     {
         var trade = new Trade
@@ -71,6 +77,8 @@ public class TradeController : ControllerBase
 
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(TradeOutputDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById(int id)
     {
@@ -94,6 +102,8 @@ public class TradeController : ControllerBase
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(TradeOutputDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(int id, TradeInputDto inputDto)
     {
@@ -137,6 +147,8 @@ public class TradeController : ControllerBase
 
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)
     {

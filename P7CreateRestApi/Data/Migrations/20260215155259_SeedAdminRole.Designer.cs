@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using P7CreateRestApi.Data;
 
@@ -11,9 +12,11 @@ using P7CreateRestApi.Data;
 namespace P7CreateRestApi.Data.Migrations
 {
     [DbContext(typeof(LocalDbContext))]
-    partial class LocalDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260215155259_SeedAdminRole")]
+    partial class SeedAdminRole
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,7 +56,7 @@ namespace P7CreateRestApi.Data.Migrations
                         {
                             Id = "ea0023f9-337c-4b61-a9dd-4dc4d32bdb92",
                             ConcurrencyStamp = "acb5c744-96cf-40ae-8d3d-49d3c48463f9",
-                            Name = "Admin",
+                            Name = "Administrateur",
                             NormalizedName = "ADMIN"
                         });
                 });

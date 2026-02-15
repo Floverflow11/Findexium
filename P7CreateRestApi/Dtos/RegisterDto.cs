@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace P7CreateRestApi.Models;
+namespace P7CreateRestApi.Dtos;
 
 public class RegisterDto
 {

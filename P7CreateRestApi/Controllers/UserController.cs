@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using P7CreateRestApi.Domain;
-using P7CreateRestApi.Models;
+using P7CreateRestApi.Dtos;
+using P7CreateRestApi.Dtos.User;
 
 namespace P7CreateRestApi.Controllers;
 

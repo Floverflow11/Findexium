@@ -8,9 +8,14 @@ using P7CreateRestApi.Data;
 using P7CreateRestApi.Domain;
 using P7CreateRestApi.Repositories;
 using P7CreateRestApi.Services;
+using Serilog;
+
+Log.Logger = new LoggerConfiguration().WriteTo.File(Path.Combine(AppContext.BaseDirectory, "Logs", "app-.txt"),
+    rollingInterval: RollingInterval.Day).CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddSerilog();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 

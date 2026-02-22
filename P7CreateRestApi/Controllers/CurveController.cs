@@ -22,7 +22,7 @@ public class CurveController : ControllerBase
     [ProducesResponseType(typeof(List<CurvePointOutputDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> Get()
+    public async Task<IActionResult> GetList()
     {
         var curvePoints = await _repository.GetAsync();
 

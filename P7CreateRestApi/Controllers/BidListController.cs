@@ -22,7 +22,7 @@ public class BidListController : ControllerBase
     [ProducesResponseType(typeof(List<BidListOutputDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> Get()
+    public async Task<IActionResult> GetList()
     {
         var bidLists = await _repository.GetAsync();
 

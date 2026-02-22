@@ -65,7 +65,7 @@ public class BidListControllerTests
 
         _mockRepository.Setup(r => r.GetAsync()).ReturnsAsync(input);
 
-        var result = await _controller.Get();
+        var result = await _controller.GetList();
 
         var ok = Assert.IsType<OkObjectResult>(result);
         var output = Assert.IsType<List<BidListOutputDto>>(ok.Value);
@@ -84,7 +84,7 @@ public class BidListControllerTests
 
         _mockRepository.Setup(r => r.GetAsync()).ReturnsAsync(input);
 
-        var result = await _controller.Get();
+        var result = await _controller.GetList();
 
         var ok = Assert.IsType<OkObjectResult>(result);
         var output = Assert.IsType<List<BidListOutputDto>>(ok.Value);

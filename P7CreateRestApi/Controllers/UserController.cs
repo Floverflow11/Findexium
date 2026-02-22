@@ -24,7 +24,7 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(List<UserOutputDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> Get()
+    public async Task<IActionResult> GetList()
     {
         var users = await _userManager.Users.ToListAsync();
 

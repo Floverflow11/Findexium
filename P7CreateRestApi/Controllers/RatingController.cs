@@ -22,7 +22,7 @@ public class RatingController : ControllerBase
     [ProducesResponseType(typeof(List<RatingOutputDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> Get()
+    public async Task<IActionResult> GetList()
     {
         var ratings = await _repository.GetAsync();
 

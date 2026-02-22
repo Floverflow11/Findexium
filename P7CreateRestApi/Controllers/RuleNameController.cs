@@ -22,7 +22,7 @@ public class RuleNameController : ControllerBase
     [ProducesResponseType(typeof(List<RuleNameOutputDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> Get()
+    public async Task<IActionResult> GetList()
     {
         var ruleNames = await _repository.GetAsync();
 

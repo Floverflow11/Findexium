@@ -22,7 +22,7 @@ public class TradeController : ControllerBase
     [ProducesResponseType(typeof(List<TradeOutputDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> Get()
+    public async Task<IActionResult> GetList()
     {
         var trades = await _repository.GetAsync();
 
